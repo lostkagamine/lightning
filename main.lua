@@ -46,6 +46,13 @@ local scrollbackClamp = 0
 
 local next_time = 0
 
+function L.screen.setResolution(w, h)
+    local _, _, m = love.window.getMode()
+    love.window.setMode(w, h, m)
+    L.screen.w = w
+    L.screen.h = h
+end
+
 function L.registerActor(act)
     table.insert(L.actors, act)
 end
