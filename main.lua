@@ -22,6 +22,8 @@ L = {}
 L.actors = {}
 L.activeScene = nil
 
+L.maxFPS = 0
+
 L.console = {}
 L.console.active = false
 L.console.font = love.graphics.newFont('resource/font.ttf', 32)
@@ -41,6 +43,8 @@ L.screen.h = h
 local consoleHistory = {}
 local consoleBuffer = ''
 local scrollbackClamp = 0
+
+local next_time = 0
 
 function L.registerActor(act)
     table.insert(L.actors, act)
@@ -130,6 +134,10 @@ function love.update(dt)
             L.console.cursorTimer = 0
         end
     end
+
+    if L.maxFPS > 0 then
+        next_time = next_time + 1/L.maxFPS
+    end
 end
 
 function love.draw()
@@ -178,6 +186,15 @@ function love.draw()
         end
 
         love.graphics.print('] '..consoleBuffer..append, conspad, bh)
+    end
+
+    if L.maxFPS > 0 then
+        local current_time = love.timer.getTime()
+        if next_time <= current_time then
+            next_time = current_time
+            return
+        end
+        love.timer.sleep(next_time - current_time)
     end
 end
 
