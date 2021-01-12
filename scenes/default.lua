@@ -1,13 +1,13 @@
 return LightningActor {
     __init = function(self)
-        print('default scene Actor init')
+        L.cprint('default scene Actor init')
+
+        UILabelActor(100, 105, 'This is a UIButtonActor -->')
+
+        UIButtonActor(430, 100, 100, 40, 'testing', function()
+            L.cprint('h')
+        end)
+
         CursorActor()
-        self.tests = 0
-    end,
-    __keydown = function(self, k, sc, r)
-        if k == 'g' then
-            self.tests = self.tests + 1
-            L.cprint('test '..self.tests)
-        end
     end
 }
