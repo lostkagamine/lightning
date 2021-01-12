@@ -43,6 +43,7 @@ L.screen.h = h
 local consoleHistory = {}
 local consoleBuffer = ''
 local scrollbackClamp = 0
+local previousMouseState = true
 
 local next_time = 0
 
@@ -217,6 +218,12 @@ function love.keypressed(k, sc, r)
         love.keyboard.setKeyRepeat(L.console.active)
         L.console.cursor = true
         L.console.cursorTimer = 0
+        if not L.console.active then
+            love.mouse.setVisible(previousMouseState)
+        else
+            previousMouseState = love.mouse.isVisible()
+            love.mouse.setVisible(true)
+        end
         consoleBuffer = ''
         return
     end
