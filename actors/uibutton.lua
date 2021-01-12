@@ -22,6 +22,7 @@ UIButtonActor = PositionalActor {
         love.graphics.print(self.text, tx, ty)
     end,
     __mousedown = function(self, x, y, btn, t, p)
+        if btn ~= 1 then return end
         local right = self.x + self.w
         local down = self.y + self.h
         if x >= self.x and y >= self.y and
