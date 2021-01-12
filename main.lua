@@ -166,7 +166,7 @@ function love.draw()
         love.graphics.rectangle('fill', 0, 0, L.screen.w, L.console.height)
 
         love.graphics.setColor(0.2, 0.2, 0.2, 1)
-        love.graphics.print(string.format('Lightning Framework %s - %dfps', _LIGHTNING_VERSION, love.timer.getFPS()), conspad, L.screen.h - (conspad*1.5))
+        love.graphics.print(string.format('Lightning Framework Developer Console v. %s - %dfps', _LIGHTNING_VERSION, love.timer.getFPS()), conspad, L.screen.h - (conspad*1.5))
 
         local alllines = {}
         for i, j in ipairs(consoleHistory) do
