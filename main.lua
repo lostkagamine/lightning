@@ -20,7 +20,7 @@ local scenes = {}
 L = {}
 
 L.actors = {}
-L.activeScene = nil
+L.scene = nil
 
 L.maxFPS = 0
 
@@ -58,6 +58,25 @@ function L.registerActor(act)
     table.insert(L.actors, act)
 end
 
+function L.getActorById(id)
+    for i, v in ipairs(L.actors) do
+        if v.__id == id then
+            return v, i
+        end
+    end
+    return nil
+end
+
+function L.destroyActor(id)
+    local act, ind = L.getActorById(id)
+
+    if act.__destroy then
+        act:__destroy()
+    end
+
+    table.remove(L.actors, ind)
+end
+
 function L.printf(fmt, ...)
     local va = {...}
     local text = string.format(fmt, unpack(va))
@@ -65,9 +84,9 @@ function L.printf(fmt, ...)
 end
 
 function L.switchScene(sceneName)
-    if L.activeScene then
-        if L.activeScene.__unload then
-            L.activeScene:__unload(sceneName)
+    if L.scene then
+        if L.scene.__unload then
+            L.scene:__unload(sceneName)
         end
     end
 
@@ -78,8 +97,9 @@ function L.switchScene(sceneName)
     L.actors = {}
 
     local sc = scenes[sceneName]
+    sc.__noregister = true
 
-    L.activeScene = sc()
+    L.scene = sc()
 
     L.printf('Entered scene %s', sceneName)
 end

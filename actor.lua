@@ -8,6 +8,8 @@ function LightningActor(tbl)
             local va = {...}
             local ns = deepcopy(self)
 
+            ns.__id = randomString(10)
+
             if ns.__super then
                 ns.__super(ns, unpack(va))
             end
@@ -15,9 +17,16 @@ function LightningActor(tbl)
                 ns.__init(ns, unpack(va))
             end
 
-            L.registerActor(ns)
+            if not ns.__noregister then
+                L.registerActor(ns)
+            end
         end
     })
+
+    t.destroy = function(self)
+        -- Destroy actor
+        L.destroyActor(self.__id)
+    end
 
     return t
 end

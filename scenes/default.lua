@@ -10,6 +10,6 @@ return LightningActor {
 
         UILabelActor(100, 200, string.format('You can open the LFW console by pressing [%s]!', string.upper(_CONSOLE_KEY)))
 
-        CursorActor()
+        self.cursor = CursorActor()
     end
 }

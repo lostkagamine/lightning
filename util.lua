@@ -45,3 +45,14 @@ function string.starts(str, thing)
 end
 
 function math.clamp(n, low, high) return math.min(math.max(n, low), high) end
+
+local rsCharset = '0123456789abcdef'
+
+function randomString(len)
+    local o = ''
+    for i=1,len do
+        local ran = love.math.random(1,#rsCharset)
+        o = o .. string.sub(rsCharset, ran, ran) -- this is terrible
+    end
+    return o
+end

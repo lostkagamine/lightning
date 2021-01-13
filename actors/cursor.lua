@@ -10,5 +10,9 @@ CursorActor = PositionalActor {
     end,
     __mousemoved = function(self, x, y, dx, dy, t)
         self:move(x, y)
+    end,
+    __destroy = function(self)
+        L.printf('cursor destroyed')
+        love.mouse.setVisible(true)
     end
 }
