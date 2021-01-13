@@ -284,3 +284,8 @@ function love.wheelmoved(x, y)
         L.console.scrollback = math.clamp(L.console.scrollback + y, 0, scrollbackClamp)
     end
 end
+
+function love.resize(w, h)
+    L.screen.w = w
+    L.screen.h = h
+end
