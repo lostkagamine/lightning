@@ -20,6 +20,8 @@ function LightningActor(tbl)
             if not ns.__noregister then
                 L.registerActor(ns)
             end
+
+            return ns
         end
     })
 

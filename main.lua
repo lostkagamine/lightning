@@ -103,9 +103,10 @@ function L.switchScene(sceneName)
     local sc = scenes[sceneName]
     sc.__noregister = true
 
-    L.scene = sc()
+    local e = sc()
+    L.scene = e
 
-    L.printf('Entered scene %s', sceneName)
+    L.printf('Entered scene %s - %s', sceneName, e.__id)
 end
 
 function L.cprint(t)
@@ -153,6 +154,10 @@ local function dispatchToActors(event, ...)
         if v[event] then
             v[event](v, unpack(va))
         end
+    end
+
+    if L.scene and L.scene[event] then
+        L.scene[event](L.scene, unpack(va))
     end
 end
 
