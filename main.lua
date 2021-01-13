@@ -70,6 +70,10 @@ end
 function L.destroyActor(id)
     local act, ind = L.getActorById(id)
 
+    if act == nil then
+        error(string.format('Actor %s is not in actor list. Does the actor exist, or are you trying to destroy the scene?', id))
+    end
+
     if act.__destroy then
         act:__destroy()
     end
