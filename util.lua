@@ -1,4 +1,4 @@
-function deepcopy(orig) -- thanks lua-users
+function deepcopy(orig) -- http://lua-users.org/wiki/CopyTable
     local orig_type = type(orig)
     local copy
     if orig_type == 'table' then
