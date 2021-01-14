@@ -1,5 +1,4 @@
 local inspect = require 'lib/inspect'
-local uuid = require 'lib/uuid'
 
 function LightningActor(tbl)
     local t = deepcopy(tbl)
@@ -9,7 +8,7 @@ function LightningActor(tbl)
             local va = {...}
             local ns = deepcopy(self)
 
-            ns.__id = uuid()
+            ns.__id = randomString(10)
 
             if ns.__super then
                 ns.__super(ns, unpack(va))
