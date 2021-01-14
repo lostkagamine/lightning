@@ -1,4 +1,3 @@
-local utf8 = require 'lib/utf8'
 local inspect = require 'lib/inspect'
 
 L.console = {}
