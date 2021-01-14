@@ -1,0 +1,6 @@
+.git
+.buildignore
+.gitignore
+build.ps1
+start.ps1
+lightning.love
