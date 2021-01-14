@@ -17,7 +17,6 @@ local inspect = require 'lib/inspect'
 local scenes = {}
 
 L = {}
-local L = L
 
 L.actors = {}
 L.scene = nil
@@ -44,15 +43,20 @@ function L.screen.setResolution(w, h)
 end
 
 function L.registerActor(act)
-    L.actors[act.__id] = act
+    table.insert(L.actors, act)
 end
 
 function L.getActorById(id)
-    return L.actors[id]
+    for i, v in ipairs(L.actors) do
+        if v.__id == id then
+            return v, i
+        end
+    end
+    return nil
 end
 
 function L.destroyActor(id)
-    local act = L.getActorById(id)
+    local act, ind = L.getActorById(id)
 
     if act == nil then
         error(string.format('Actor %s is not in actor list. This actor may not exist! Are you trying to destroy the scene?', id))
@@ -62,7 +66,7 @@ function L.destroyActor(id)
         act:__destroy()
     end
 
-   L.actors[id] = nil
+    table.remove(L.actors, ind)
 end
 
 function L.printf(fmt, ...)
