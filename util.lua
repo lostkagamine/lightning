@@ -1,10 +1,6 @@
-<<<<<<< HEAD
 local utf8 = require 'utf8'
 
-function deepcopy(orig) -- thanks lua-users
-=======
 function deepcopy(orig) -- http://lua-users.org/wiki/CopyTable
->>>>>>> 3b6767bb4e358cda7e43b405f7456ab5b602953a
     local orig_type = type(orig)
     local copy
     if orig_type == 'table' then
