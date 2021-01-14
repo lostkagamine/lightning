@@ -1,3 +1,4 @@
+local utf8 = require 'utf8'
 local inspect = require 'lib/inspect'
 
 L.console = {}
@@ -14,29 +15,54 @@ L.console.history = {}
 L.console.scrollback = 0
 L.console.scrollbackClamp = 0
 
+L.console.argumentTransformers = {
+    string = function(arg) return arg end,
+    number = function(arg) return tonumber(arg) end
+}
+
 L.console.commands = {
     help = {
         description = 'Lists and provides help with commands.',
-        syntax = '[command:string]',
-        execute = function(args)
-            if #args < 1 then
+        arguments = {
+            command = 'string?'
+        },
+        execute = function(command)
+            local function formatArgumentInfo(name, type)
+                if string.ends(type, '?') then
+                    return '[' .. name .. ':' .. utf8.sub(type, 1, #type - 1) .. ']'
+                else
+                    return '<' .. name .. ':' .. type .. '>'
+                end
+            end
+
+            if command == nil then
                 local commandList = 'Commands:\n'
 
                 for command, commandObj in pairs(L.console.commands) do
                     commandList = commandList .. command
-                    if commandObj.syntax then
-                        commandList = commandList .. ' %[dddddd](' .. commandObj.syntax .. ')'
+                    if commandObj.arguments ~= nil then
+                        commandList = commandList .. ' %[ddddddff]('
+                        local formattedArgs = {}
+                        for n, t in pairs(commandObj.arguments) do
+                            table.insert(formattedArgs, formatArgumentInfo(n, t))
+                        end
+                        commandList = commandList .. table.concat(formattedArgs, ' ') .. ')'
                     end
                     commandList = commandList .. ' -> ' .. commandObj.description
                 end
 
                 L.cprint(commandList)
             else
-                local command = L.console.commands[args[1]]
-                if command ~= nil then
-                    L.cprint('Help for ' .. args[1] .. ':\n' .. command.description .. '\nUsage: :' .. args[1] .. ' ' .. command.syntax)
+                local cmd = L.console.commands[command]
+                if cmd ~= nil then
+                    local formattedArgs = {}
+                    for n, t in pairs(cmd.arguments) do
+                        table.insert(formattedArgs, formatArgumentInfo(n, t))
+                    end
+                    syntax = table.concat(formattedArgs, ' ')
+                    L.cprint('Help for ' .. command .. ':\n' .. cmd.description .. '\nUsage: :' .. command .. ' ' .. syntax)
                 else
-                    L.cprint('Cannot retrieve help for non-existent command ' .. args[1] .. '.')
+                    L.cprint('Cannot retrieve help for non-existent command ' .. command .. '.')
                 end
             end
         end
@@ -49,7 +75,7 @@ function L.cprint(t)
     end
 
     table.insert(L.console.history, t)
-    print(l)
+    print(t)
 end
 
 function L.console.clear()
@@ -77,8 +103,43 @@ function L.console.keypress(k)
             end
             local command = table.remove(args, 1)
 
-            if L.console.commands[command] then
-                L.console.commands[command].execute(args)
+            local commandObj = L.console.commands[command]
+            if commandObj then
+                if commandObj.arguments then
+                    local transformedArguments = {}
+                    local argumentPointer = 1
+                    for name, type in pairs(commandObj.arguments) do
+                        if string.ends(type, '?') then
+                            if not args[argumentPointer] then break end -- stop after first unfulfilled optional
+
+                            type = string.sub(type, 1, #type - 1)
+                        end
+
+                        if not L.console.argumentTransformers[type] then
+                            L.cprint('unknown argument transformer: ' .. type)
+                            goto continue
+                        end
+
+                        ok, res = pcall(function() return L.console.argumentTransformers[type](args[argumentPointer]) end)
+
+                        if not ok then
+                            L.cprint('failed to transform argument for ' .. name .. ':' .. type)
+                            break
+                        end
+
+                        table.insert(transformedArguments, res)
+                        ::continue::
+                        argumentPointer = argumentPointer + 1
+                    end
+
+                    xpcall(function() commandObj.execute(unpack(transformedArguments)) end, function(err)
+                        L.cprint(debug.traceback(err))
+                    end)
+                else
+                    xpcall(function() commandObj.execute() end, function(err)
+                        L.cprint(debug.traceback(err))
+                    end)
+                end
             else
                 L.cprint('Unknown command: ' .. command)
             end
