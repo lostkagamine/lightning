@@ -18,6 +18,7 @@ local utf8 = require 'utf8'
 local scenes = {}
 
 L = {}
+local L = L
 
 L.actors = {}
 L.scene = nil
@@ -55,16 +56,11 @@ function L.screen.setResolution(w, h)
 end
 
 function L.registerActor(act)
-    table.insert(L.actors, act)
+    L.actors[act.__id] = act
 end
 
 function L.getActorById(id)
-    for i, v in ipairs(L.actors) do
-        if v.__id == id then
-            return v, i
-        end
-    end
-    return nil
+    return L.actors[id]
 end
 
 function L.destroyActor(id)
@@ -78,7 +74,7 @@ function L.destroyActor(id)
         act:__destroy()
     end
 
-    table.remove(L.actors, ind)
+   L.actors[id] = nil
 end
 
 function L.printf(fmt, ...)
