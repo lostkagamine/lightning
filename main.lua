@@ -13,7 +13,6 @@ _CONSOLE_ENABLED = true
 _CONSOLE_KEY = 'f1'
 
 local inspect = require 'lib/inspect'
-local utf8 = require 'utf8'
 
 local scenes = {}
 
@@ -24,24 +23,13 @@ L.scene = nil
 
 L.maxFPS = 0
 
-L.console = {}
-L.console.active = false
-L.console.font = love.graphics.newFont('resource/font.ttf', 32)
-
-L.console.height = 250
-L.console.cursor = true
-L.console.cursorTimer = 0
-L.console.blinkInterval = 0.5
-
-L.console.scrollback = 0
+require 'console'
 
 L.screen = {}
 local w, h, m = love.window.getMode()
 L.screen.w = w
 L.screen.h = h
 
-local consoleHistory = {}
-local consoleBuffer = ''
 local scrollbackClamp = 0
 local previousMouseState = true
 
@@ -109,19 +97,6 @@ function L.switchScene(sceneName)
     L.printf('Entered scene %s - %s', sceneName, e.__id)
 end
 
-function L.cprint(t)
-    if type(t) ~= 'string' then
-        t = inspect(t)
-    end
-
-    table.insert(consoleHistory, t)
-    print(t)
-end
-
-function L.console.clear()
-    consoleHistory = {}
-end
-
 function love.load()
     L.printf("-- Lightning Framework --\nVersion %s\nCreated by Rin, 2021", _LIGHTNING_VERSION)
 
@@ -181,48 +156,7 @@ function love.draw()
     dispatchToActors('__draw')
 
     if L.console.active then
-        love.graphics.setFont(L.console.font)
-
-        local conspad = 30
-        local bw, bh = L.screen.w-(conspad*2), L.console.height-(conspad*2)
-
-        local baseheight = L.console.font:getHeight("a")
-        local basewidth = L.console.font:getWidth("a")
-        local maxchars = math.floor(bh/baseheight)
-
-        love.graphics.setColor(0, 0, 0, 0.5)
-        love.graphics.rectangle('fill', 0, 0, L.screen.w, L.screen.h)
-        love.graphics.setColor(0.1, 0.1, 0.1, 1)
-        love.graphics.rectangle('fill', 0, 0, L.screen.w, L.console.height)
-
-        love.graphics.setColor(0.2, 0.2, 0.2, 1)
-        love.graphics.print(string.format('Lightning Framework Developer Console v. %s - %dfps', _LIGHTNING_VERSION, love.timer.getFPS()), conspad, L.screen.h - (conspad*1.5))
-
-        local alllines = {}
-        for i, j in ipairs(consoleHistory) do
-            local _, wt = L.console.font:getWrap(j, bw)
-            for k, l in ipairs(wt) do
-                table.insert(alllines, l)
-            end
-        end
-        local linecount = #alllines
-        local constart = math.max(1, ((linecount-maxchars)+2)-math.max(L.console.scrollback, 0))
-        scrollbackClamp = math.max(0, linecount-(maxchars-2))
-
-        love.graphics.setColor(1, 1, 1, 1)
-
-        local m = 0
-        local conend = constart+(maxchars-2)
-        for i, j in ipairs(table.trim(alllines, constart, conend)) do
-            love.graphics.print(j, conspad, baseheight*i)
-        end
-
-        local append = ''
-        if L.console.cursor then
-            append = '_'
-        end
-
-        love.graphics.print('] '..consoleBuffer..append, conspad, bh)
+        L.console.draw()
     end
 
     if L.maxFPS > 0 then
@@ -237,7 +171,7 @@ end
 
 function love.textinput(t)
     if L.console.active then
-        consoleBuffer = consoleBuffer .. t
+        L.console.buffer = L.console.buffer .. t
     end
 end
 
@@ -253,40 +187,12 @@ function love.keypressed(k, sc, r)
             previousMouseState = love.mouse.isVisible()
             love.mouse.setVisible(true)
         end
-        consoleBuffer = ''
+        L.console.buffer = ''
         return
     end
 
     if L.console.active then
-        if k == 'backspace' then
-            local byteoffset = utf8.offset(consoleBuffer, -1)
-     
-            if byteoffset then
-                consoleBuffer = string.sub(consoleBuffer, 1, byteoffset - 1)
-            end
-        end
-
-        if k == 'return' then
-            L.cprint('] '..consoleBuffer)
-
-            local fn, ler = loadstring(consoleBuffer)
-            if not fn then
-                L.cprint(ler)
-            else
-                local ok, er = pcall(function()
-                    local res = fn()
-                    if res then
-                        L.cprint(res)
-                    end
-                end)
-                if not ok then
-                    L.cprint(er)
-                end
-            end
-
-            consoleBuffer = ''
-        end
-        return
+        L.console.keypress(k)
     end
 
     dispatchToActors('__keydown', k, sc, r)
@@ -310,7 +216,7 @@ end
 
 function love.wheelmoved(x, y)
     if L.console.active then
-        L.console.scrollback = math.clamp(L.console.scrollback + y, 0, scrollbackClamp)
+        L.console.scrollback = math.clamp(L.console.scrollback + y, 0, L.console.scrollbackClamp)
     end
 end
 
