@@ -64,7 +64,7 @@ function L.getActorById(id)
 end
 
 function L.destroyActor(id)
-    local act, ind = L.getActorById(id)
+    local act = L.getActorById(id)
 
     if act == nil then
         error(string.format('Actor %s is not in actor list. This actor may not exist! Are you trying to destroy the scene?', id))
