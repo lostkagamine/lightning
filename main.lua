@@ -26,7 +26,7 @@ L.maxFPS = 0
 
 L.console = {}
 L.console.active = false
-L.console.font = love.graphics.newFont('resource/font.ttf', 32)
+L.console.font = love.graphics.newFont('resource/font.ttf', 18)
 
 L.console.height = 250
 L.console.cursor = true
